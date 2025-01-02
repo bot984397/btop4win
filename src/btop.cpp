@@ -193,8 +193,10 @@ void term_resize(bool force) {
 
 //* Exit handler; restores terminal and saves config changes
 void clean_quit(int sig) {
-	if (Global::quitting) return;
-	Global::quitting = true;
+   bool expected = false;
+   if (!Global::quitting.compare_exchange_strong(expected, true)) {
+      return;
+   }
 	Runner::stop();
 
 	Config::write();
